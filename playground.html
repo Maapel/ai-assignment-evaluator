@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assignment Evaluator - Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group select,
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group textarea:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .results-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .results-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-section h4 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .score-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-item strong {
+            color: #667eea;
+        }
+
+        .analysis-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .preset-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: #dee2e6;
+        }
+
+        .preset-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 AI Playground</h1>
+            <div class="nav-links">
+                <a href="/">← Back to Evaluator</a>
+                <a href="/settings">⚙️ Settings</a>
+            </div>
+        </div>
+
+        <div class="playground-grid">
+            <!-- Configuration Panel -->
+            <div class="panel">
+                <h2>🔧 Configuration</h2>
+
+                <div class="form-group">
+                    <label for="model-select">AI Model:</label>
+                    <select id="model-select">
+                        <option value="">Loading models...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sample-select">Sample Submission:</label>
+                    <select id="sample-select">
+                        <option value="">Select a sample...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="functional-score">Functional Score (0-10):</label>
+                    <input type="number" id="functional-score" min="0" max="10" step="0.1" value="7.5">
+                </div>
+            </div>
+
+            <!-- Prompt Panel -->
+            <div class="panel">
+                <h2>📝 System Prompt</h2>
+
+                <div class="preset-prompts">
+                    <button class="preset-btn active" data-preset="default">Default Analysis</button>
+                    <button class="preset-btn" data-preset="detailed">Detailed Feedback</button>
+                    <button class="preset-btn" data-preset="strict">Strict Grading</button>
+                    <button class="preset-btn" data-preset="custom">Custom</button>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="system-prompt" placeholder="Enter your custom system prompt here..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" id="test-btn">🚀 Test Analysis</button>
+                    <button class="btn btn-secondary" id="reset-btn">🔄 Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Running AI analysis...</p>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="results-panel" id="results-panel" style="display: none;">
+            <h3>📊 Analysis Results</h3>
+
+            <div id="status-message"></div>
+
+            <div class="result-section">
+                <h4>🎯 Extracted Scores</h4>
+                <div class="score-display" id="score-display">
+                    <!-- Scores will be populated here -->
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h4>🤖 AI Analysis Response</h4>
+                <div class="analysis-content" id="analysis-content">
+                    <!-- Analysis content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let availableModels = [];
+        let sampleSubmissions = [];
+        let currentSample = null;
+
+        // Preset prompts
+        const presetPrompts = {
+            default: `You are a computer science educator providing detailed, justifiable feedback for a programming assignment.
+
+STUDENT CODE:
+{code}
+
+STUDENT REPORT:
+{report}
+
+FUNCTIONAL SCORE: {functional_score}/10 (test cases passed - provided by system)
+
+Provide a comprehensive analysis following this EXACT TEMPLATE. Replace X.X with numerical scores.
+
+## 🔧 CODE QUALITY ANALYSIS
+**Algorithm Implementation:** X.X/5.0 - [2-3 sentence justification]
+**Code Structure:** X.X/3.0 - [2-3 sentence justification]
+**Best Practices:** X.X/2.0 - [2-3 sentence justification]
+**Total Code Score:** X.X/10 (sum of above scores)
+
+## 📝 REPORT QUALITY ANALYSIS
+**Content Quality:** X.X/4.0 - [2-3 sentence justification]
+**Technical Depth:** X.X/3.0 - [2-3 sentence justification]
+**Presentation:** X.X/3.0 - [2-3 sentence justification]
+**Total Report Score:** X.X/10 (sum of above scores)
+
+## 🎯 STUDENT FEEDBACK
+**Strengths:** [List 2-3 specific positive points with examples]
+**Areas for Improvement:** [List 2-3 specific actionable suggestions]
+**Learning Objectives:** [List key concepts to focus on next]
+
+## ✅ INSTRUCTOR NOTES
+[Detailed assessment of understanding, grading considerations, academic integrity]
+
+CRITICAL: Use EXACT format shown above. Scores must be decimal numbers (e.g., 4.5, 2.0, 1.5). Ensure breakdown scores sum correctly to totals.`,
+
+            detailed: `You are an expert computer science educator providing comprehensive, detailed feedback for a programming assignment. Focus on deep analysis of algorithmic thinking, code efficiency, and learning outcomes.
+
+STUDENT CODE:
+{code}
+
+STUDENT REPORT:
+{report}
+
+FUNCTIONAL SCORE: {functional_score}/10 (test cases passed - provided by system)
+
+Provide an extensive analysis following this EXACT TEMPLATE with detailed justifications:
+
+## 🔧 CODE QUALITY ANALYSIS
+**Algorithm Implementation:** X.X/5.0 - [Detailed analysis of algorithmic correctness, efficiency, and optimization]
+**Code Structure:** X.X/3.0 - [Analysis of code organization, modularity, and readability]
+**Best Practices:** X.X/2.0 - [Evaluation of PEP8 compliance, documentation, and professional standards]
+**Total Code Score:** X.X/10 (sum of above scores)
+
+## 📝 REPORT QUALITY ANALYSIS
+**Content Quality:** X.X/4.0 - [Assessment of technical content accuracy and completeness]
+**Technical Depth:** X.X/3.0 - [Evaluation of analytical depth and understanding]
+**Presentation:** X.X/3.0 - [Review of clarity, structure, and communication effectiveness]
+**Total Report Score:** X.X/10 (sum of above scores)
+
+## 🎯 STUDENT FEEDBACK
+**Strengths:** [List 3-4 specific positive points with concrete examples from the code]
+**Areas for Improvement:** [List 3-4 specific actionable suggestions with examples]
+**Learning Objectives:** [List key concepts to focus on with specific recommendations]
+
+## ✅ INSTRUCTOR NOTES
+[Comprehensive assessment including grading recommendations, academic integrity evaluation, and teaching insights]
+
+CRITICAL: Use EXACT format shown above. Scores must be decimal numbers. Provide detailed justifications for each score.`,
+
+            strict: `You are a rigorous computer science professor maintaining high academic standards. Focus on algorithmic correctness, code quality, and demonstration of deep understanding.
+
+STUDENT CODE:
+{code}
+
+STUDENT REPORT:
+{report}
+
+FUNCTIONAL SCORE: {functional_score}/10 (test cases passed - provided by system)
+
+Provide a strict, thorough evaluation following this EXACT TEMPLATE:
+
+## 🔧 CODE QUALITY ANALYSIS
+**Algorithm Implementation:** X.X/5.0 - [Rigorous analysis of algorithmic correctness and efficiency]
+**Code Structure:** X.X/3.0 - [Critical evaluation of code organization and design patterns]
+**Best Practices:** X.X/2.0 - [Strict assessment of coding standards and documentation]
+**Total Code Score:** X.X/10 (sum of above scores)
+
+## 📝 REPORT QUALITY ANALYSIS
+**Content Quality:** X.X/4.0 - [Critical assessment of technical accuracy and depth]
+**Technical Depth:** X.X/3.0 - [Evaluation of analytical rigor and understanding]
+**Presentation:** X.X/3.0 - [Review of professional presentation and clarity]
+**Total Report Score:** X.X/10 (sum of above scores)
+
+## 🎯 STUDENT FEEDBACK
+**Strengths:** [List specific strengths with evidence from the work]
+**Areas for Improvement:** [List critical areas requiring immediate attention]
+**Learning Objectives:** [List essential concepts that must be mastered]
+
+## ✅ INSTRUCTOR NOTES
+[Detailed assessment with specific grading recommendations and academic integrity evaluation]
+
+CRITICAL: Use EXACT format shown above. Scores must be decimal numbers. Be thorough and critical in evaluation.`
+        };
+
+        // Initialize the playground
+        document.addEventListener('DOMContentLoaded', function() {
+            loadModels();
+            loadSampleSubmissions();
+            setupEventListeners();
+            setDefaultPrompt();
+        });
+
+        // Load available models
+        async function loadModels() {
+            try {
+                const response = await fetch('/settings');
+                const data = await response.json();
+
+                availableModels = data.available_models || [];
+                const modelSelect = document.getElementById('model-select');
+
+                modelSelect.innerHTML = '<option value="">Select a model...</option>';
+
+                availableModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = `${model.name} (${model.context_length} tokens)`;
+                    if (model.id === data.current_model) {
+                        option.selected = true;
+                    }
+                    modelSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                document.getElementById('model-select').innerHTML = '<option value="">Failed to load models</option>';
+            }
+        }
+
+        // Load sample submissions
+        async function loadSampleSubmissions() {
+            try {
+                // For now, we'll use some predefined samples
+                // In a real implementation, this would fetch from the server
+                sampleSubmissions = [
+                    {
+                        id: 'sample1',
+                        name: 'Sample Keyboard Optimization - Good',
+                        code: `import math
+import random
+
+def preprocess_text(text):
+    """Preprocess input text for keyboard optimization"""
+    return text.lower().replace(' ', '').replace(',', '').replace('.', '')
+
+def path_length_cost(path, keyboard_layout):
+    """Calculate the total path length cost for a text on a keyboard layout"""
+    total_cost = 0
+    for i in range(len(path) - 1):
+        char1, char2 = path[i], path[i + 1]
+        if char1 in keyboard_layout and char2 in keyboard_layout:
+            pos1 = keyboard_layout[char1]
+            pos2 = keyboard_layout[char2]
+            cost = math.dist(pos1, pos2)
+            total_cost += cost
+    return total_cost
+
+def simulated_annealing(text, keyboard_layout, initial_temp=1000, alpha=0.95, max_iter=1000):
+    """Optimize keyboard layout using simulated annealing"""
+    current_layout = keyboard_layout.copy()
+    current_cost = path_length_cost(text, current_layout)
+    best_layout = current_layout.copy()
+    best_cost = current_cost
+    temp = initial_temp
+
+    for _ in range(max_iter):
+        # Generate neighbor solution by swapping two keys
+        keys = list(current_layout.keys())
+        i, j = random.sample(range(len(keys)), 2)
+        neighbor_layout = current_layout.copy()
+        neighbor_layout[keys[i]], neighbor_layout[keys[j]] = neighbor_layout[keys[j]], neighbor_layout[keys[i]]
+
+        neighbor_cost = path_length_cost(text, neighbor_layout)
+
+        # Accept better solution or worse solution with probability
+        if neighbor_cost < current_cost or random.random() < math.exp((current_cost - neighbor_cost) / temp):
+            current_layout = neighbor_layout
+            current_cost = neighbor_cost
+
+            if current_cost < best_cost:
+                best_layout = current_layout.copy()
+                best_cost = current_cost
+
+        temp *= alpha
+
+    return best_layout, best_cost
+
+# Example usage
+if __name__ == "__main__":
+    sample_text = "hello world"
+    initial_layout = {'h': (0,0), 'e': (0,1), 'l': (0,2), 'o': (0,3), ' ': (1,0), 'w': (1,1), 'r': (1,2), 'd': (1,3)}
+
+    optimized_layout, final_cost = simulated_annealing(sample_text, initial_layout)
+    print(f"Optimized layout: {optimized_layout}")
+    print(f"Final cost: {final_cost}")`,
+                        report: `This assignment implements a keyboard layout optimization using simulated annealing algorithm. The code includes three main functions: preprocess_text for input cleaning, path_length_cost for calculating movement costs, and simulated_annealing for the optimization process.
+
+The algorithm starts with an initial keyboard layout and iteratively improves it by swapping key positions. The cost function measures the total distance traveled when typing the given text. Through simulated annealing, the algorithm explores different layouts and converges to a locally optimal solution.
+
+The implementation demonstrates understanding of heuristic optimization techniques and their application to real-world problems like keyboard design.`
+                    },
+                    {
+                        id: 'sample2',
+                        name: 'Sample Keyboard Optimization - Basic',
+                        code: `def preprocess_text(text):
+    return text.lower()
+
+def path_length_cost(path, layout):
+    cost = 0
+    for i in range(len(path)-1):
+        cost += 1  # Simple cost
+    return cost
+
+def simulated_annealing(text, layout):
+    return layout, 10  # Basic implementation`,
+                        report: `This is a basic implementation of keyboard optimization.`
+                    }
+                ];
+
+                const sampleSelect = document.getElementById('sample-select');
+                sampleSubmissions.forEach(sample => {
+                    const option = document.createElement('option');
+                    option.value = sample.id;
+                    option.textContent = sample.name;
+                    sampleSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load samples:', error);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Preset prompt buttons
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const preset = this.dataset.preset;
+                    if (preset === 'custom') {
+                        document.getElementById('system-prompt').value = '';
+                        document.getElementById('system-prompt').focus();
+                    } else {
+                        setPresetPrompt(preset);
+                    }
+                });
+            });
+
+            // Sample selection
+            document.getElementById('sample-select').addEventListener('change', function() {
+                const sampleId = this.value;
+                currentSample = sampleSubmissions.find(s => s.id === sampleId);
+            });
+
+            // Test button
+            document.getElementById('test-btn').addEventListener('click', runAnalysis);
+
+            // Reset button
+            document.getElementById('reset-btn').addEventListener('click', function() {
+                setDefaultPrompt();
+                document.querySelectorAll('.preset-btn')[0].click();
+            });
+        }
+
+        // Set preset prompt
+        function setPresetPrompt(preset) {
+            const promptText = presetPrompts[preset];
+            document.getElementById('system-prompt').value = promptText;
+        }
+
+        // Set default prompt
+        function setDefaultPrompt() {
+            setPresetPrompt('default');
+        }
+
+        // Run analysis
+        async function runAnalysis() {
+            const model = document.getElementById('model-select').value;
+            const prompt = document.getElementById('system-prompt').value;
+            const functionalScore = parseFloat(document.getElementById('functional-score').value) || 0;
+
+            if (!model) {
+                showStatus('Please select a model', 'error');
+                return;
+            }
+
+            if (!currentSample) {
+                showStatus('Please select a sample submission', 'error');
+                return;
+            }
+
+            if (!prompt.trim()) {
+                showStatus('Please enter a system prompt', 'error');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results-panel').style.display = 'none';
+
+            try {
+                // Prepare the prompt with sample data
+                const filledPrompt = prompt
+                    .replace('{code}', currentSample.code)
+                    .replace('{report}', currentSample.report || 'No report submitted')
+                    .replace('{functional_score}', functionalScore.toFixed(1));
+
+                // Call OpenRouter API directly from frontend
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + getApiKey(), // You'll need to implement getApiKey()
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{ role: 'user', content: filledPrompt }],
+                        max_tokens: 1500,
+                        temperature: 0.3
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const aiResponse = result.choices[0].message.content;
+
+                // Parse scores from response
+                const scores = parseScores(aiResponse);
+
+                // Display results
+                displayResults(aiResponse, scores, functionalScore);
+
+                showStatus('Analysis completed successfully!', 'success');
+
+            } catch (error) {
+                console.error('Analysis failed:', error);
+                showStatus(`Analysis failed: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
+
+        // Get API key (this would need to be implemented securely)
+        function getApiKey() {
+            // For demo purposes - in production, this should be handled server-side
+            return 'YOUR_OPENROUTER_API_KEY';
+        }
+
+        // Parse scores from AI response
+        function parseScores(response) {
+            const scores = {
+                algorithm: 0,
+                structure: 0,
+                practices: 0,
+                content: 0,
+                technical: 0,
+                presentation: 0
+            };
+
+            // Extract scores using regex
+            const patterns = {
+                algorithm: /\*\*Algorithm Implementation:\*\*\s*(\d+(?:\.\d+)?)/i,
+                structure: /\*\*Code Structure:\*\*\s*(\d+(?:\.\d+)?)/i,
+                practices: /\*\*Best Practices:\*\*\s*(\d+(?:\.\d+)?)/i,
+                content: /\*\*Content Quality:\*\*\s*(\d+(?:\.\d+)?)/i,
+                technical: /\*\*Technical Depth:\*\*\s*(\d+(?:\.\d+)?)/i,
+                presentation: /\*\*Presentation:\*\*\s*(\d+(?:\.\d+)?)/i
+            };
+
+            for (const [key, pattern] of Object.entries(patterns)) {
+                const match = response.match(pattern);
+                if (match) {
+                    scores[key] = parseFloat(match[1]) || 0;
+                }
+            }
+
+            return scores;
+        }
+
+        // Display results
+        function displayResults(aiResponse, scores, functionalScore) {
+            const resultsPanel = document.getElementById('results-panel');
+            const scoreDisplay = document.getElementById('score-display');
+            const analysisContent = document.getElementById('analysis-content');
+
+            // Calculate totals
+            const codeTotal = scores.algorithm + scores.structure + scores.practices;
+            const reportTotal = scores.content + scores.technical + scores.presentation;
+
+            // Display scores
+            scoreDisplay.innerHTML = `
+                <div class="score-item">
+                    <strong>Functional:</strong> ${functionalScore.toFixed(1)}/10
+                </div>
+                <div class="score-item">
+                    <strong>Code Quality:</strong> ${codeTotal.toFixed(1)}/10
+                    <br><small>(${scores.algorithm.toFixed(1)} + ${scores.structure.toFixed(1)} + ${scores.practices.toFixed(1)})</small>
+                </div>
+                <div class="score-item">
+                    <strong>Report Quality:</strong> ${reportTotal.toFixed(1)}/10
+                    <br><small>(${scores.content.toFixed(1)} + ${scores.technical.toFixed(1)} + ${scores.presentation.toFixed(1)})</small>
+                </div>
+                <div class="score-item">
+                    <strong>Weighted Total:</strong> ${((functionalScore + codeTotal + reportTotal) / 3).toFixed(1)}/10
+                </div>
+            `;
+
+            // Display analysis
+            analysisContent.textContent = aiResponse;
+
+            // Show results
+            resultsPanel.style.display = 'block';
+            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

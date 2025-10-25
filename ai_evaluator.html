@@ -13,7 +13,11 @@
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-800 mb-2">AI Assignment Evaluator</h1>
             <p class="text-gray-600">Upload student submission zip files for automated evaluation</p>
-            <div class="mt-4">
+            <div class="mt-4 flex gap-3">
+                <a href="/playground.html" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i data-lucide="gamepad-2" class="w-4 h-4 inline mr-2"></i>
+                    AI Playground
+                </a>
                 <button id="settings-btn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
                     <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>
                     Scoring Settings
@@ -23,49 +27,91 @@
 
         <!-- Settings Panel -->
         <div id="settings-panel" class="bg-white rounded-lg shadow-md p-6 mb-8 hidden">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">🎯 Scoring Weights Configuration</h3>
-            <p class="text-gray-600 mb-4">Adjust how different components contribute to the final score (must sum to 100%)</p>
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">🎯 Scoring Weights Configuration</h3>
+                <p class="text-gray-600 mb-4">Adjust how different components contribute to the final score (must sum to 100%)</p>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">Functional Tests</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="range" id="functional-weight" min="0" max="1" step="0.05" value="0.4" class="flex-1">
-                        <span id="functional-value" class="text-sm font-medium text-blue-600 w-12">40%</span>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Functional Tests</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="range" id="functional-weight" min="0" max="1" step="0.05" value="0.4" class="flex-1">
+                            <span id="functional-value" class="text-sm font-medium text-blue-600 w-12">40%</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Test cases passed (static analysis)</p>
                     </div>
-                    <p class="text-xs text-gray-500">Test cases passed (static analysis)</p>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Code Quality</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="range" id="code-quality-weight" min="0" max="1" step="0.05" value="0.4" class="flex-1">
+                            <span id="code-quality-value" class="text-sm font-medium text-blue-600 w-12">40%</span>
+                        </div>
+                        <p class="text-xs text-gray-500">AI-assessed code quality</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Report Quality</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="range" id="report-quality-weight" min="0" max="1" step="0.05" value="0.2" class="flex-1">
+                            <span id="report-value" class="text-sm font-medium text-blue-600 w-12">20%</span>
+                        </div>
+                        <p class="text-xs text-gray-500">AI-assessed report quality</p>
+                    </div>
                 </div>
 
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">Code Quality</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="range" id="code-quality-weight" min="0" max="1" step="0.05" value="0.4" class="flex-1">
-                        <span id="code-quality-value" class="text-sm font-medium text-blue-600 w-12">40%</span>
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-blue-800">Total Weight:</span>
+                        <span id="total-weight" class="text-lg font-bold text-blue-600">100%</span>
                     </div>
-                    <p class="text-xs text-gray-500">AI-assessed code quality</p>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">Report Quality</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="range" id="report-quality-weight" min="0" max="1" step="0.05" value="0.2" class="flex-1">
-                        <span id="report-value" class="text-sm font-medium text-blue-600 w-12">20%</span>
+                    <div id="weight-warning" class="text-sm text-red-600 mt-2 hidden">
+                        ⚠️ Weights must sum to 100%
                     </div>
-                    <p class="text-xs text-gray-500">AI-assessed report quality</p>
                 </div>
             </div>
 
-            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-blue-800">Total Weight:</span>
-                    <span id="total-weight" class="text-lg font-bold text-blue-600">100%</span>
-                </div>
-                <div id="weight-warning" class="text-sm text-red-600 mt-2 hidden">
-                    ⚠️ Weights must sum to 100%
+            <!-- Starter Code Configuration -->
+            <div class="border-t border-gray-200 pt-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">📝 Starter Code Exclusion</h3>
+                <p class="text-gray-600 mb-4">Upload or paste starter code that should be ignored during plagiarism detection</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Starter Code File</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="file" id="starter-code-file" accept=".py,.txt,.md" class="hidden">
+                            <button onclick="document.getElementById('starter-code-file').click()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                                <i data-lucide="upload" class="w-4 h-4 inline mr-2"></i>
+                                Choose File
+                            </button>
+                            <span id="starter-file-name" class="text-sm text-gray-600">No file selected</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Supported formats: .py, .txt, .md</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Or Paste Starter Code</label>
+                        <textarea id="starter-code-text" rows="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Paste your starter code here..."></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Code will be normalized and excluded from plagiarism analysis</p>
+                    </div>
+
+                    <div id="starter-code-preview" class="hidden">
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-gray-700">Starter Code Preview</span>
+                                <button onclick="clearStarterCode()" class="text-red-600 hover:text-red-800 text-sm">
+                                    <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>
+                                    Clear
+                                </button>
+                            </div>
+                            <pre id="starter-code-content" class="text-xs text-gray-800 whitespace-pre-wrap font-mono bg-white p-2 rounded border max-h-40 overflow-y-auto"></pre>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-6 flex space-x-4">
+            <div class="mt-8 flex space-x-4">
                 <button id="save-settings" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50">
                     Save Settings
                 </button>
@@ -236,7 +282,6 @@
                                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Report Quality</th>
                                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Overall Score</th>
                                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Plagiarism</th>
-                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Grade</th>
                             </tr>
                         </thead>
                         <tbody id="overview-table-body">
@@ -302,6 +347,13 @@
         const resetSettings = document.getElementById('reset-settings');
         const closeSettings = document.getElementById('close-settings');
 
+        // Starter code elements
+        const starterCodeFile = document.getElementById('starter-code-file');
+        const starterFileName = document.getElementById('starter-file-name');
+        const starterCodeText = document.getElementById('starter-code-text');
+        const starterCodePreview = document.getElementById('starter-code-preview');
+        const starterCodeContent = document.getElementById('starter-code-content');
+
         // Export elements
         const exportCsv = document.getElementById('export-csv');
         const exportJson = document.getElementById('export-json');
@@ -322,6 +374,10 @@
         saveSettings.addEventListener('click', saveSettingsToServer);
         resetSettings.addEventListener('click', resetSettingsToDefault);
         closeSettings.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+
+        // Starter code event listeners
+        starterCodeFile.addEventListener('change', handleStarterCodeFile);
+        starterCodeText.addEventListener('input', handleStarterCodeText);
 
         // Load current settings on page load
         loadCurrentSettings();
@@ -645,25 +701,6 @@
                 const overallScore = (student.functional_score * 0.4 + student.code_quality_score * 0.4 + student.report_score * 0.2) * 100;
                 const overallScoreFormatted = overallScore.toFixed(1) + '%';
 
-                // Determine grade based on overall score
-                let grade, gradeClass;
-                if (overallScore >= 90) {
-                    grade = 'A';
-                    gradeClass = 'bg-green-100 text-green-800';
-                } else if (overallScore >= 80) {
-                    grade = 'B';
-                    gradeClass = 'bg-blue-100 text-blue-800';
-                } else if (overallScore >= 70) {
-                    grade = 'C';
-                    gradeClass = 'bg-yellow-100 text-yellow-800';
-                } else if (overallScore >= 60) {
-                    grade = 'D';
-                    gradeClass = 'bg-orange-100 text-orange-800';
-                } else {
-                    grade = 'F';
-                    gradeClass = 'bg-red-100 text-red-800';
-                }
-
                 // Add to overview table
                 const tableRow = document.createElement('tr');
                 tableRow.className = 'border-t border-gray-200';
@@ -695,16 +732,11 @@
                                 ${plagiarismScore}%
                             </span>
                             ${student.plagiarism_details && student.plagiarism_details.length > 0 ? `
-                                <button onclick="showPlagiarismDetails('${student.student_id}', ${JSON.stringify(student.plagiarism_details).replace(/"/g, '"')})" class="text-blue-500 hover:text-blue-700 text-xs">
+                                <button onclick="showPlagiarismDetails('${student.student_id}', '${btoa(JSON.stringify(student.plagiarism_details))}')" class="text-blue-500 hover:text-blue-700 text-xs">
                                     <i data-lucide="info" class="w-3 h-3"></i>
                                 </button>
                             ` : ''}
                         </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${gradeClass}">
-                            ${grade}
-                        </span>
                     </td>
                 `;
                 tableBody.appendChild(tableRow);
@@ -954,10 +986,12 @@
         }
 
         async function saveSettingsToServer() {
+            const starterCode = starterCodeText.value.trim();
             const settings = {
                 functional_tests: parseFloat(functionalWeight.value),
                 code_quality: parseFloat(codeQualityWeight.value),
-                report_quality: parseFloat(reportQualityWeight.value)
+                report_quality: parseFloat(reportQualityWeight.value),
+                starter_code: starterCode
             };
 
             try {
@@ -1032,21 +1066,20 @@
             const rowsData = tableBody.querySelectorAll('tr');
 
             // Add header
-            rows.push(['Student ID', 'Test Cases (%)', 'Code Quality (%)', 'Report Quality (%)', 'Overall Score (%)', 'Plagiarism (%)', 'Grade', 'AI Feedback']);
+            rows.push(['Student ID', 'Test Cases (%)', 'Code Quality (%)', 'Report Quality (%)', 'Overall Score (%)', 'Plagiarism (%)', 'AI Feedback']);
 
             // Add data rows
             rowsData.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length >= 7) {
+                if (cells.length >= 6) {
                     const studentId = cells[0].textContent.trim();
                     const testCases = cells[1].textContent.replace('%', '').trim();
                     const codeQuality = cells[2].textContent.replace('%', '').trim();
                     const reportQuality = cells[3].textContent.replace('%', '').trim();
                     const overallScore = cells[4].textContent.replace('%', '').trim();
                     const plagiarism = cells[5].textContent.replace('%', '').trim();
-                    const grade = cells[6].textContent.trim();
 
-                    rows.push([studentId, testCases, codeQuality, reportQuality, overallScore, plagiarism, grade, 'See detailed analysis']);
+                    rows.push([studentId, testCases, codeQuality, reportQuality, overallScore, plagiarism, 'See detailed analysis']);
                 }
             });
 
@@ -1089,57 +1122,212 @@
                 });
         }
 
-        function showPlagiarismDetails(studentId, plagiarismDetails) {
-            // Create modal for plagiarism details
+        function showPlagiarismDetails(studentId, encodedData) {
+            let plagiarismDetails;
+            try {
+                // Decode the base64 encoded JSON data
+                plagiarismDetails = JSON.parse(atob(encodedData));
+            } catch (error) {
+                console.error('Failed to decode plagiarism data:', error);
+                alert('Failed to load plagiarism details');
+                return;
+            }
+
+            // Create enhanced modal for plagiarism details
             const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-800">🔍 Plagiarism Analysis</h3>
-                            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                                <i data-lucide="x" class="w-6 h-6"></i>
+                <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+                    <div class="p-6 border-b border-gray-200 flex-shrink-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-red-100 rounded-lg">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">🔍 Academic Integrity Analysis</h3>
+                                    <p class="text-sm text-gray-600">Student: <span class="font-medium">${studentId}</span></p>
+                                </div>
+                            </div>
+                            <button onclick="this.closest('.fixed').remove()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="x" class="w-6 h-6 text-gray-500"></i>
                             </button>
                         </div>
+                    </div>
 
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-600">
-                                <strong>Student:</strong> ${studentId}
-                            </p>
-                        </div>
+                    <div class="p-6 overflow-y-auto flex-1 min-h-0">
+                        ${plagiarismDetails.length > 0 ? `
+                            <div class="mb-6">
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <i data-lucide="file-x" class="w-5 h-5 text-red-500"></i>
+                                    <h4 class="text-lg font-semibold text-gray-800">Potential Academic Integrity Concerns</h4>
+                                </div>
+                                <p class="text-gray-600 mb-4">
+                                    The following submissions show significant code similarities. Please review carefully and consider the context of each submission.
+                                </p>
+                            </div>
 
-                        <div class="space-y-3">
-                            <h4 class="font-medium text-gray-700">Similar Submissions Found:</h4>
-                            ${plagiarismDetails.length > 0 ?
-                                plagiarismDetails.map(detail => `
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-medium text-red-800">${detail.student_id}</span>
-                                            <span class="text-sm bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                                                ${detail.similarity}% similar
-                                            </span>
+                            <div class="space-y-4">
+                                ${plagiarismDetails.map((detail, index) => {
+                                    const severityColor = detail.severity === 'critical' ? 'red' :
+                                                        detail.severity === 'high' ? 'orange' : 'yellow';
+                                    const severityIcon = detail.severity === 'critical' ? 'alert-triangle' :
+                                                       detail.severity === 'high' ? 'alert-circle' : 'info';
+
+                                    return `
+                                        <div class="border border-${severityColor}-200 rounded-lg overflow-hidden">
+                                            <div class="bg-${severityColor}-50 px-4 py-3 border-b border-${severityColor}-200">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="p-1 bg-${severityColor}-100 rounded">
+                                                            <i data-lucide="${severityIcon}" class="w-4 h-4 text-${severityColor}-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="font-semibold text-gray-800">${detail.student_id}</span>
+                                                            <span class="ml-2 text-sm text-gray-600">• ${detail.similarity}% similarity</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="px-2 py-1 text-xs font-medium bg-${severityColor}-100 text-${severityColor}-800 rounded-full capitalize">
+                                                            ${detail.severity} Risk
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="p-4">
+                                                <div class="mb-3">
+                                                    <p class="text-sm text-gray-700 mb-2">
+                                                        <strong>Analysis:</strong> ${detail.reason}
+                                                    </p>
+                                                    ${detail.analysis ? `
+                                                        <p class="text-sm text-gray-600">
+                                                            <strong>Details:</strong> ${detail.analysis}
+                                                        </p>
+                                                    ` : ''}
+                                                </div>
+
+                                                ${detail.similar_code_blocks && detail.similar_code_blocks.length > 0 ? `
+                                                    <div class="mt-4">
+                                                        <div class="flex items-center space-x-2 mb-3">
+                                                            <i data-lucide="code" class="w-4 h-4 text-gray-500"></i>
+                                                            <span class="text-sm font-medium text-gray-700">Similar Code Segments</span>
+                                                        </div>
+                                                        <div class="space-y-3">
+                                                            ${detail.similar_code_blocks.map((block, blockIndex) => `
+                                                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                                                    <div class="flex items-center justify-between mb-2">
+                                                                        <span class="text-xs font-medium text-gray-600">Segment ${blockIndex + 1}</span>
+                                                                        <button onclick="copyToClipboard(this.nextElementSibling)" class="text-xs text-blue-600 hover:text-blue-800 flex items-center space-x-1">
+                                                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                                                            <span>Copy</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <pre class="text-xs text-gray-800 whitespace-pre-wrap font-mono bg-white p-2 rounded border overflow-x-auto">${block.replace(/</g, '<').replace(/>/g, '>')}</pre>
+                                                                </div>
+                                                            `).join('')}
+                                                        </div>
+                                                    </div>
+                                                ` : ''}
+
+                                                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                    <div class="flex items-start space-x-2">
+                                                        <i data-lucide="lightbulb" class="w-4 h-4 text-blue-600 mt-0.5"></i>
+                                                        <div class="text-sm text-blue-800">
+                                                            <strong>Recommendation:</strong> Compare submission files directly and consider interviewing students about their implementation approach.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p class="text-xs text-red-600 mt-1">
-                                            High similarity detected - review required
-                                        </p>
-                                    </div>
-                                `).join('') :
-                                '<p class="text-green-600 text-sm">No significant similarities found</p>'
-                            }
-                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : `
+                            <div class="text-center py-12">
+                                <div class="p-4 bg-green-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                    <i data-lucide="check-circle" class="w-8 h-8 text-green-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">No Significant Similarities Detected</h4>
+                                <p class="text-gray-600">
+                                    This submission does not show concerning levels of similarity with other submissions in the batch.
+                                </p>
+                            </div>
+                        `}
 
-                        <div class="mt-6 flex justify-end">
-                            <button onclick="this.closest('.fixed').remove()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                                Close
-                            </button>
+                        <div class="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="flex items-start space-x-3">
+                                <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                                <div class="text-sm text-gray-700">
+                                    <strong>About this analysis:</strong> Similarity detection uses AST parsing and structural comparison to identify potential academic integrity concerns. This analysis should be used as a starting point for manual review, not as final determination.
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                            Close
+                        </button>
+                        <button onclick="window.print()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                            <i data-lucide="printer" class="w-4 h-4 inline mr-2"></i>
+                            Print Report
+                        </button>
                     </div>
                 </div>
             `;
 
             document.body.appendChild(modal);
             lucide.createIcons();
+        }
+
+        function copyToClipboard(element) {
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                // Show temporary success feedback
+                const originalText = element.previousElementSibling.textContent;
+                element.previousElementSibling.textContent = 'Copied!';
+                setTimeout(() => {
+                    element.previousElementSibling.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        function handleStarterCodeFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                starterFileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    starterCodeText.value = content;
+                    updateStarterCodePreview(content);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function handleStarterCodeText(e) {
+            const content = e.target.value;
+            updateStarterCodePreview(content);
+        }
+
+        function updateStarterCodePreview(content) {
+            if (content.trim()) {
+                starterCodeContent.textContent = content;
+                starterCodePreview.classList.remove('hidden');
+            } else {
+                starterCodePreview.classList.add('hidden');
+            }
+        }
+
+        function clearStarterCode() {
+            starterCodeFile.value = '';
+            starterCodeText.value = '';
+            starterFileName.textContent = 'No file selected';
+            starterCodePreview.classList.add('hidden');
         }
 
         function resetUI() {
