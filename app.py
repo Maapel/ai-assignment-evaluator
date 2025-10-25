@@ -1765,5 +1765,49 @@ def update_settings():
     except Exception as e:
         return jsonify({"error": f"Failed to update settings: {str(e)}"}), 500
 
+@app.route('/playground/analyze', methods=['POST'])
+def playground_analyze():
+    """Endpoint for playground AI analysis testing"""
+    global DEFAULT_MODEL, GROQ_MODEL  # Declare globals at the start
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        code = data.get('code', '')
+        report_text = data.get('report_text', '')
+        model = data.get('model', DEFAULT_MODEL)
+        functional_score = data.get('functional_score', 0.0)
+
+        if not code.strip():
+            return jsonify({"error": "Code content is required"}), 400
+
+        # Use the appropriate AI provider
+        if AI_PROVIDER == 'groq' and groq_client:
+            # Temporarily override the model for this request
+            original_model = GROQ_MODEL
+            GROQ_MODEL = model
+            try:
+                result = analyze_with_groq(code, report_text, functional_score)
+            finally:
+                GROQ_MODEL = original_model
+        elif AI_PROVIDER == 'openrouter' and openrouter_available:
+            # Temporarily override the model for this request
+            original_model = DEFAULT_MODEL
+            DEFAULT_MODEL = model
+            try:
+                result = analyze_with_openrouter(code, report_text, functional_score)
+            finally:
+                DEFAULT_MODEL = original_model
+        else:
+            return jsonify({"error": f"AI provider {AI_PROVIDER} not available"}), 503
+
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"Playground analysis error: {e}")
+        return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
